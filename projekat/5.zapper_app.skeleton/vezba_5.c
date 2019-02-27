@@ -108,31 +108,31 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 			break;
 		case 2:
 			printf("Changing to Channel 1!\n");
-			startChannel(1);
+			startChannel(0);
 			break;
 		case 3:
 			printf("Changing to Channel 2!\n");
-			startChannel(2);
+			startChannel(1);
 			break;
 		case 4:
 			printf("Changing to Channel 3!\n");
-			startChannel(3);
+			startChannel(2);
 			break;
 		case 5:
 			printf("Changing to Channel 4!\n");
-			startChannel(4);
+			startChannel(3);
 			break;
 		case 6:
 			printf("Changing to Channel 5!\n");
-			startChannel(5);
+			startChannel(4);
 			break;
 		case 7:
 			printf("Changing to Channel 6!\n");
-			startChannel(6);
+			startChannel(5);
 			break;
 		case 8:
 			printf("Changing to Channel 7!\n");
-			startChannel(7);
+			startChannel(6);
 			break;
 		default:
 			printf("\nPress P+, P-, info or exit! \n\n");
