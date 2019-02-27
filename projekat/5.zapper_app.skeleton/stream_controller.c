@@ -29,10 +29,11 @@ static tStreamType audioStreamType;
 static tStreamType videoStreamType;
 static int16_t inputVideoPID=0;
 static int16_t inputAudioPID=0;
+
 static pthread_cond_t demuxCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t demuxMutex = PTHREAD_MUTEX_INITIALIZER;
 static void* streamControllerTask(input_struct* );
-static void startChannel(int32_t channelNumber);
+
 static t_Module moduleConvertFun(char*);
 static tStreamType streamConvertFun(int8_t);
 

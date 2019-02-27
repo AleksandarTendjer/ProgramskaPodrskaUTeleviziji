@@ -81,7 +81,7 @@ StreamControllerError channelDown();
  * @return stream controller error code
  */
 StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
-
-
+//move to chanel 
+void startChannel(int32_t channelNumber);
 
 #endif /* __STREAM_CONTROLLER_H__ */
