@@ -107,6 +107,7 @@ StreamControllerError volumeUp()
 {
 	if(volume<10)
 		volume++;
+	
 	if(Player_Volume_Set(playerHandle,volume)!=0)
 		return SC_ERROR;
 	
@@ -546,8 +547,5 @@ tStreamType streamConvertFun(int8_t streamType)
 	{
 		printf("error in input stream type!\n");
 	}
-	
-	
-
 }
 

@@ -1,5 +1,6 @@
 #include "remote_controller.h"
 #include "stream_controller.h"
+#include "graphics.h"
 
 static inline void textColor(int32_t attr, int32_t fg, int32_t bg)
 {
@@ -118,22 +119,30 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 		case 4:
 			printf("Changing to Channel 3!\n");
 			startChannel(2);
+			printf("usao u crtanje\n");
+			//drawKeycode(2);
 			break;
 		case 5:
 			printf("Changing to Channel 4!\n");
 			startChannel(3);
+			printf("usao u crtanje\n");
+			//drawKeycode(3);
 			break;
 		case 6:
 			printf("Changing to Channel 5!\n");
 			startChannel(4);
+			printf("usao u crtanje\n");
+			//drawKeycode(4);
 			break;
 		case 7:
 			printf("Changing to Channel 6!\n");
 			startChannel(5);
+			//drawKeycode(5);
 			break;
 		case 8:
 			printf("Changing to Channel 7!\n");
 			startChannel(6);
+			//drawKeycode(6);
 			break;
 		case VOLUME_UP:
 			printf("Volume up!\n");
@@ -157,81 +166,7 @@ void readConf(FILE *fp)
 	//char ch = getc(fp);
 	fscanf(fp,"%d %d %s %d %d %d %d %d",&inputData->freq,&inputData->bandwith,inputData->module,&inputData->audioPID,&inputData->videoPID,&inputData->audioType,&inputData->videoType,&inputData->programNumber);
 	
-	/*while(1)
-	{
-	//printf("%d",inputData->audioPID);
-	printf("uspeo \n");
-	}*/
-	/*int8_t lineCount=0;
-	int8_t len=0;
-	char line[10];
-	while(ch!=EOF)
-	{
-		if(lineCount!=0)
-			ch=getc(fp);
-
-		while(ch!='\n')
-		{
-			line[len]=ch;
-			len++;
-			ch=getc(fp);
-		}
-		//len++;
-		line[len]='\0';
-		lineCount++;
-
-		switch(lineCount)
-		{
-			case 1:
-				inputData->freq=atoi(line);
-				printf("%d \n",inputData->freq);
-				line[0]='\0';
-				len=0;
-				break;
-			case 2:
-				inputData->bandwith=atoi(line);
-				printf("%d \n",inputData->bandwith);
-				line[0]='\0';
-				len=0;
-				break;
-			case 3:
-				strcpy(inputData->module,line);
-				printf("%s \n",inputData->module);
-				line[0]='\0';
-				len=0;
-				break;
-			case 4:
-				inputData->audioPID=atoi(line);
-				printf("%d \n",inputData->audioPID);
-				line[0]='\0';
-				len=0;
-				break;
-			case 5:
-				inputData->videoPID=atoi(line);
-				printf("%d \n",inputData->videoPID);
-				line[0]='\0';
-				len=0;
-				break;
-			case 6:
-				inputData->audioType=atoi(line);
-				
-				line[0]='\0';
-				len=0;
-				break;
-			case 7:
-				inputData->videoType=atoi(line);
-				line[0]='\0';
-				len=0;
-				break;
-			case 8:
-				inputData->programNumber=atoi(line);
-				printf("%d \n",inputData->programNumber);
-				line[0]='\0';
-				len=0;
-				return 0;
-				
-		}
-	} */
+	
 } 
 
 
