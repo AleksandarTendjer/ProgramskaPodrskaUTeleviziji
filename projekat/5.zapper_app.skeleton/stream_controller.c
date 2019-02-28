@@ -18,6 +18,7 @@ static bool changeChannel = false;
 static int16_t programNumber = 0;
 static ChannelInfo currentChannel;
 static bool isInitialized = false;
+int16_t volume=0;
 
 static struct timespec lockStatusWaitTime;
 static struct timeval now;
@@ -101,7 +102,38 @@ StreamControllerError streamControllerDeinit()
 
     return SC_NO_ERROR;
 }
+//volume up
+StreamControllerError volumeUp()
+{
+	if(volume<10)
+		volume++;
+	if(Player_Volume_Set(playerHandle,volume)!=0)
+		return SC_ERROR;
+	
+	return SC_NO_ERROR;
+		
+}
+StreamControllerError volumeDown()
+{
+	if(volume!=0)
+		volume--;
 
+	if(Player_Volume_Set(playerHandle,volume)!=0)
+		return SC_ERROR;
+	
+	return SC_NO_ERROR;
+		
+}
+StreamControllerError mute()
+{
+		volume=0;
+
+	if(Player_Volume_Set(playerHandle,volume)!=0)
+		return SC_ERROR;
+	
+	return SC_NO_ERROR;
+		
+}
 StreamControllerError channelUp()
 {   
 	
@@ -195,7 +227,7 @@ void startChannel(int32_t channelNumber)
 			{
 				if(inputVideoPID==pmtTable->pmtElementaryInfoArray[i].elementaryPid)
 				{
-            		videoPid = pmtTable->pmtElementaryInfoArray[i].elementaryPid;
+            				videoPid = pmtTable->pmtElementaryInfoArray[i].elementaryPid;
 					printf("Video Pid:%d\n",videoPid);
 					
 				}
@@ -222,10 +254,9 @@ void startChannel(int32_t channelNumber)
 			{
 				if(inputAudioPID== pmtTable->pmtElementaryInfoArray[i].elementaryPid)
 				{
-            		audioPid = pmtTable->pmtElementaryInfoArray[i].elementaryPid;
+            				audioPid = pmtTable->pmtElementaryInfoArray[i].elementaryPid;
 					printf("Audio Pid:%d\n",audioPid);
 		
-					
 				}
 				else
 				{

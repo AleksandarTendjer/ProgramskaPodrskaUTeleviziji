@@ -81,7 +81,33 @@ StreamControllerError channelDown();
  * @return stream controller error code
  */
 StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
-//move to chanel 
+/**
+ * @brief starts new channel
+ *
+ * @param [out] channelNumber-the channel that will be played
+ * @return no return
+ */
 void startChannel(int32_t channelNumber);
+/**
+ * @brief increments the volume  
+ *
+ * @param [out]  
+ * @return stream error or no error
+ */
+StreamControllerError volumeUp();
+/**
+ * @brief decrements the volume  
+ *
+ * @param [out]  
+ * @return stream error or no error
+ */
+StreamControllerError volumeDown();
+/**
+ * @brief sets the volume on 0 
+ *
+ * @param [out] 
+ * @return stream error or no error
+ */
+StreamControllerError mute();
 
 #endif /* __STREAM_CONTROLLER_H__ */

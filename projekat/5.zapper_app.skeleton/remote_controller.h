@@ -14,6 +14,9 @@
 #define KEYCODE_P_PLUS 62
 #define KEYCODE_P_MINUS 61
 #define KEYCODE_INFO 358
+#define VOLUME_UP 63
+#define VOLUME_DOWN 64
+#define MUTE 60
 
 /* input event values for 'EV_KEY' type */
 #define EV_VALUE_RELEASE    0

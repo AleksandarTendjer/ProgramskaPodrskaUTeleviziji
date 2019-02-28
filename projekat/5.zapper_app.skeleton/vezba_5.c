@@ -106,6 +106,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 		    pthread_cond_signal(&deinitCond);
 		    pthread_mutex_unlock(&deinitMutex);
 			break;
+		//channel number pressed
 		case 2:
 			printf("Changing to Channel 1!\n");
 			startChannel(0);
@@ -133,6 +134,18 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 		case 8:
 			printf("Changing to Channel 7!\n");
 			startChannel(6);
+			break;
+		case VOLUME_UP:
+			printf("Volume up!\n");
+			volumeUp();
+			break;
+		case VOLUME_DOWN:
+			printf("Volume down!\n");
+			volumeDown();
+			break;
+		case MUTE:
+			printf("Muted!\n");
+			mute();
 			break;
 		default:
 			printf("\nPress P+, P-, info or exit! \n\n");
