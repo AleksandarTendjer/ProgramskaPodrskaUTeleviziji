@@ -137,6 +137,7 @@ StreamControllerError volumeUp()
 	{
 		volume++;
 		changeVolume=true;
+		graphicVolume(volume);
 	}
 	//if(Player_Volume_Set(playerHandle,volume)!=0)
 		//return SC_ERROR;
@@ -150,6 +151,7 @@ StreamControllerError volumeDown()
 	{
 		volume--;
 		changeVolume=true;
+		graphicVolume(volume);
 	}
 	//if(Player_Volume_Set(playerHandle,volume)!=0)
 	//	return SC_ERROR;
@@ -165,12 +167,14 @@ StreamControllerError muteVolume()
 		printf("muted!\n");
 		volume=0;
 		mute=true;
+		graphicVolume(volume);
 	}
 	else
 	{
 		volume=previousVolume;
 		printf("unmuted!\n");
 		mute=false;
+		graphicVolume(volume);
 	}
 	changeVolume=true;
 	//if(Player_Volume_Set(playerHandle,volume)!=0)
