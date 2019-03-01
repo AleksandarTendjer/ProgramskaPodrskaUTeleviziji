@@ -10,9 +10,11 @@
 #include <directfb.h>
 #include <signal.h>
 #include <time.h>
+#include "stream_controller.h"
 #define FRAME_THICKNESS 20
 #define FONT_HEIGHT 150
 #define EXIT_BUTTON_KEYCODE 102
+
 
 
 /* helper macro for error checking */
@@ -26,7 +28,10 @@ if (err != DFB_OK)                                          \
     DirectFBErrorFatal( #x, err );                          \
   }                                                         \
 }
-void drawKeycode(int32_t keycode);
- void wipeScreen(union sigval signalArg);
-void drawInfo(); 
+ 
+void* graphics(  );
+void wipeScreen(union sigval signalArg);
+void wipeScreenVolume(union sigval signalArga);
 
+void graphicVolume(int8_t volumeNumber);
+void intializeVariables();

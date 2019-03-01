@@ -11,6 +11,7 @@
 #include <errno.h>
 #include <stdbool.h>
 
+
 #define DESIRED_FREQUENCY 818000000	        /* Tune frequency in Hz */
 #define BANDWIDTH 8  
   				        /* Bandwidth in Mhz */
@@ -46,6 +47,15 @@ typedef struct _ChannelInfo
     int16_t videoPid;
 }ChannelInfo;
 
+extern ChannelInfo currentChannel;
+extern bool flagCH;
+
+extern struct itimerspec timerSpec;
+extern struct itimerspec timerSpecOld;
+extern struct itimerspec timerSpecVolume;
+extern struct itimerspec timerSpecOldVolume;
+extern timer_t timerId;
+extern timer_t timerIdVolume;
 /**
  * @brief Initializes stream controller module
  *
@@ -108,6 +118,15 @@ StreamControllerError volumeDown();
  * @param [out] 
  * @return stream error or no error
  */
-StreamControllerError mute();
+StreamControllerError muteVolume();
+/**
+ * @brief callse the tdp api voluem set function
+ *
+ * @param [out] 
+ * @return
+ */
+void setVolume();
+void onInfoPressed();
+void onVolumePressed();
 
 #endif /* __STREAM_CONTROLLER_H__ */

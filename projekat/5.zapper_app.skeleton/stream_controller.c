@@ -1,5 +1,6 @@
 #include "stream_controller.h"
-
+#include "graphics.h"
+//#include "flag.h"
 static PatTable *patTable;
 static PmtTable *pmtTable;
 static pthread_cond_t statusCondition = PTHREAD_COND_INITIALIZER;
@@ -15,14 +16,30 @@ static uint32_t streamHandleV = 0;
 static uint32_t filterHandle = 0;
 static uint8_t threadExit = 0;
 static bool changeChannel = false;
+static bool changeVolume=false;
 static int16_t programNumber = 0;
-static ChannelInfo currentChannel;
+ChannelInfo currentChannel;
 static bool isInitialized = false;
 int16_t volume=0;
-
+static int8_t previousVolume=0;
+static bool mute=false;
+ bool teletextExists=false;
 static struct timespec lockStatusWaitTime;
 static struct timeval now;
+struct sigevent signalEvent;
+struct sigevent signalEventVolume;
+ timer_t timerId;
+ timer_t timerIdVolume;
 static pthread_t scThread;
+struct itimerspec timerSpec;
+struct itimerspec timerSpecOld;
+struct itimerspec timerSpecVolume;
+struct itimerspec timerSpecOldVolume;
+static IDirectFBSurface *primary = NULL;
+IDirectFB *dfbInterface = NULL;
+DFBSurfaceDescription surfaceDesc;
+
+bool flagCH=false;
 //
 static int8_t firstPassVideo=0;
 static int8_t firstPassAudio=0;
@@ -40,6 +57,16 @@ static tStreamType streamConvertFun(int8_t);
 
 StreamControllerError streamControllerInit(input_struct* inputStruct)
 {
+	
+	printf("streamControllerInit\n");
+    DFBCHECK(DirectFBInit(NULL,NULL));
+    /* fetch the DirectFB interface */
+	DFBCHECK(DirectFBCreate(&dfbInterface));
+    
+    /* tell the DirectFB to take the full screen for this application */
+	DFBCHECK(dfbInterface->SetCooperativeLevel(dfbInterface, DFSCL_FULLSCREEN));
+	
+
     if (pthread_create(&scThread, NULL, &streamControllerTask, inputStruct))
     {
         printf("Error creating input event task!\n");
@@ -102,14 +129,17 @@ StreamControllerError streamControllerDeinit()
 
     return SC_NO_ERROR;
 }
+/***************************VOLUME FUNCTIONS*************************************/
 //volume up
 StreamControllerError volumeUp()
 {
 	if(volume<10)
+	{
 		volume++;
-	
-	if(Player_Volume_Set(playerHandle,volume)!=0)
-		return SC_ERROR;
+		changeVolume=true;
+	}
+	//if(Player_Volume_Set(playerHandle,volume)!=0)
+		//return SC_ERROR;
 	
 	return SC_NO_ERROR;
 		
@@ -117,23 +147,57 @@ StreamControllerError volumeUp()
 StreamControllerError volumeDown()
 {
 	if(volume!=0)
+	{
 		volume--;
-
-	if(Player_Volume_Set(playerHandle,volume)!=0)
-		return SC_ERROR;
+		changeVolume=true;
+	}
+	//if(Player_Volume_Set(playerHandle,volume)!=0)
+	//	return SC_ERROR;
 	
 	return SC_NO_ERROR;
 		
 }
-StreamControllerError mute()
+StreamControllerError muteVolume()
 {
+	if(mute==false)
+	{
+		previousVolume=volume;
+		printf("muted!\n");
 		volume=0;
-
-	if(Player_Volume_Set(playerHandle,volume)!=0)
-		return SC_ERROR;
+		mute=true;
+	}
+	else
+	{
+		volume=previousVolume;
+		printf("unmuted!\n");
+		mute=false;
+	}
+	changeVolume=true;
+	//if(Player_Volume_Set(playerHandle,volume)!=0)
+		//return SC_ERROR;
 	
 	return SC_NO_ERROR;
 		
+}
+void setVolume()
+{
+	uint32_t ret;
+
+	uint32_t tdpVolume=volume*107374182;
+	if(Player_Volume_Set(playerHandle, tdpVolume))
+	{
+		printf("Volume can't be set\n");
+	}
+	
+	memset(&timerSpecVolume,0,sizeof(timerSpecVolume));
+    timerSpecVolume.it_value.tv_sec = 3;
+    
+    /* set the new timer specs */
+    ret = timer_settime(timerIdVolume,0,&timerSpecVolume,&timerSpecOldVolume);
+    if(ret == -1)
+    {
+        printf("Error setting timer in %s!\n", __FUNCTION__);
+    }
 }
 StreamControllerError channelUp()
 {   
@@ -195,7 +259,41 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo)
  */
 void startChannel(int32_t channelNumber)
 {
+     int32_t ret;
     
+    /* create timer */
+    signalEvent.sigev_notify = SIGEV_THREAD; /* tell the OS to notify you about timer by calling the specified function */
+    signalEvent.sigev_notify_function = wipeScreen; /* function to be called when timer runs out */
+    signalEvent.sigev_value.sival_ptr = NULL;//&currentChannel; /* thread arguments */
+    signalEvent.sigev_notify_attributes = NULL; /* thread attributes (e.g. thread stack size) - if NULL default attributes are applied */
+    ret = timer_create(/*clock for time measuring*/CLOCK_REALTIME,
+                       /*timer settings*/&signalEvent,
+                       /*where to store the ID of the newly created timer*/&timerId);
+    if(ret == -1){
+        printf("Error creating timer, abort!\n");
+        primary->Release(primary);
+        dfbInterface->Release(dfbInterface);
+        
+        return;
+    }
+    
+     /* set the function for clearing screen */
+
+    /* create timer */
+    signalEventVolume.sigev_notify = SIGEV_THREAD; /* tell the OS to notify you about timer by calling the specified function */
+    signalEventVolume.sigev_notify_function = wipeScreenVolume; /* function to be called when timer runs out */
+    signalEventVolume.sigev_value.sival_ptr = NULL; /* thread arguments */
+    signalEventVolume.sigev_notify_attributes = NULL; /* thread attributes (e.g. thread stack size) - if NULL default attributes are applied */
+    ret = timer_create(/*clock for time measuring*/CLOCK_REALTIME,
+                       /*timer settings*/&signalEventVolume,
+                       /*where to store the ID of the newly created timer*/&timerIdVolume);
+    if(ret == -1){
+        printf("Error creating timer, abort!\n");
+        primary->Release(primary);
+        dfbInterface->Release(dfbInterface);
+        
+        return;
+    }
     /* free PAT table filter */
     Demux_Free_Filter(playerHandle, filterHandle);
     
@@ -214,15 +312,16 @@ void startChannel(int32_t channelNumber)
         streamControllerDeinit();
 	}
 	pthread_mutex_unlock(&demuxMutex);
-    
+    	
     /* get audio and video pids */
     int16_t audioPid = -1;
     int16_t videoPid = -1;
     uint8_t i = 0;
+	teletextExists=false;
     for (i = 0; i < pmtTable->elementaryInfoCount; i++)
     {
         if (((pmtTable->pmtElementaryInfoArray[i].streamType == 0x1) || (pmtTable->pmtElementaryInfoArray[i].streamType == 0x2) || (pmtTable->pmtElementaryInfoArray[i].streamType == 0x1b))
-            && (videoPid == -1))
+  && (videoPid == -1))
         {
 			if(firstPassVideo==1)
 			{
@@ -276,35 +375,21 @@ void startChannel(int32_t channelNumber)
 			}       
             
         }
-    }
-
-    if (videoPid != -1) 
-    {
-        /* remove previous video stream */
-        if (streamHandleV != 0)
+	if(teletextExists==false)
+		if(pmtTable->pmtElementaryInfoArray[i].streamType == 0x06)
         {
-		    Player_Stream_Remove(playerHandle, sourceHandle, streamHandleV);
-            streamHandleV = 0;
+        	teletextExists = true;
+        	printf("TELETEKST POSTOJI !!!!!!!!!!!!!!!!!\n");
         }
-
-        /* create video stream */
-        if(Player_Stream_Create(playerHandle, sourceHandle, videoPid,videoStreamType /*VIDEO_TYPE_MPEG2*/, &streamHandleV))
-        {
-            printf("\n%s : ERROR Cannot create video stream\n", __FUNCTION__);
-            streamControllerDeinit();
-        }
-    }else{
-	/* remove previous video stream */
-	if (streamHandleV != 0)
-		{
-			    Player_Stream_Remove(playerHandle, sourceHandle, streamHandleV);
-		    streamHandleV = 0;
-			
-		}
-
 	}
-
-    if (audioPid != -1)
+	printf("ovde sam\n");
+  	
+	 if (audioPid != -1 && videoPid != -1){
+    	flagCH=true;
+    	
+    }
+	
+	if (audioPid != -1)
     {   
         /* remove previos audio stream */
         if (streamHandleA != 0)
@@ -320,11 +405,58 @@ void startChannel(int32_t channelNumber)
             streamControllerDeinit();
         }
     }
+    if (videoPid != -1) 
+    {
+        /* remove previous video stream */
+        if (streamHandleV != 0)
+        {
+		    Player_Stream_Remove(playerHandle, sourceHandle, streamHandleV);
+            streamHandleV = 0;
+        }
+
+        /* create video stream */
+        if(Player_Stream_Create(playerHandle, sourceHandle, videoPid,videoStreamType /*VIDEO_TYPE_MPEG2*/, &streamHandleV))
+        {
+            printf("\n%s : ERROR Cannot create video stream\n", __FUNCTION__);
+            streamControllerDeinit();
+        }
+    }
+	else
+	{
+		flagCH=false;
+	/* remove previous video stream */
+		if (streamHandleV != 0)
+			{
+					Player_Stream_Remove(playerHandle, sourceHandle, streamHandleV);
+				streamHandleV = 0;
+			
+			}
+	}
+	printf("ovde sam 3");
     
+	//creating a thread for graphics function
+     memset(&timerSpec,0,sizeof(timerSpec));
+    timerSpec.it_value.tv_sec = 3;
+
+	printf("ovde sam 4");
+    if (pthread_create(&scThread, NULL, &graphics,NULL))
+    {
+        printf("Error creating input event task!\n");
+    }
+		//graphics();
+    printf("ovde sam 5");
+    /* set the new timer specs */
+    ret = timer_settime(timerId,0,&timerSpec,&timerSpecOld);
+    if(ret == -1)
+    {
+        printf("Error setting timer in %s!\n", __FUNCTION__);
+    }
+	 printf("    ovde sam 8aaaa        ");
     /* store current channel info */
     currentChannel.programNumber = channelNumber + 1;
     currentChannel.audioPid = audioPid;
     currentChannel.videoPid = videoPid;
+	 printf("ovde sam 8");
 		
 }
 
@@ -451,6 +583,11 @@ void* streamControllerTask(input_struct* inputStruct)
             changeChannel = false;
             startChannel(programNumber);
         }
+		if(changeVolume)
+		{
+			changeVolume=false;
+			setVolume();
+		}
     }
 }
 
@@ -548,4 +685,72 @@ tStreamType streamConvertFun(int8_t streamType)
 		printf("error in input stream type!\n");
 	}
 }
+void onInfoPressed()
+{
+	printf("onInfoPressed\n");
+	int32_t ret;
+	timer_gettime(timerId, &timerSpec);
+	
+	if(timerSpec.it_value.tv_sec < 3 && timerSpec.it_value.tv_sec > 0)
+   	{
+		memset(&timerSpec,0,sizeof(timerSpec));
+		timerSpec.it_value.tv_sec = 3;
+		
+		/* set the new timer specs */
+		ret = timer_settime(timerId,0,&timerSpec,&timerSpecOld);
+		if(ret == -1)
+		{
+		    printf("Error setting timer in %s!\n", __FUNCTION__);
+		}
+	}
+	else
+	{
+		graphics();	
+	
+		memset(&timerSpec,0,sizeof(timerSpec));
+		timerSpec.it_value.tv_sec = 3;
+		
+		/* set the new timer specs */
+		ret = timer_settime(timerId,0,&timerSpec,&timerSpecOld);
+		if(ret == -1)
+		{
+		    printf("Error setting timer in %s!\n", __FUNCTION__);
+		}			
+	}	
+}
+
+void onVolumePressed()
+{
+	printf("onVolumePressed\n");
+	int32_t ret;
+	timer_gettime(timerIdVolume, &timerSpecVolume);
+	
+	if(timerSpecVolume.it_value.tv_sec < 3 && timerSpecVolume.it_value.tv_sec > 0)
+   	{
+		memset(&timerSpecVolume,0,sizeof(timerSpecVolume));
+		timerSpecVolume.it_value.tv_sec = 3;
+		
+		/* set the new timer specs */
+		ret = timer_settime(timerIdVolume,0,&timerSpecVolume,&timerSpecOldVolume);
+		if(ret == -1)
+		{
+		    printf("Error setting timer in %s!\n", __FUNCTION__);
+		}
+	}
+	else
+	{
+		graphicVolume(volume);	
+	
+		memset(&timerSpecVolume,0,sizeof(timerSpecVolume));
+		timerSpecVolume.it_value.tv_sec = 3;
+		
+		/* set the new timer specs */
+		ret = timer_settime(timerIdVolume,0,&timerSpecVolume,&timerSpecOldVolume);
+		if(ret == -1)
+		{
+		    printf("Error setting timer in %s!\n", __FUNCTION__);
+		}			
+	}	
+}
+
 

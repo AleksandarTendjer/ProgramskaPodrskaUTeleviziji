@@ -1,6 +1,6 @@
 #include "remote_controller.h"
 #include "stream_controller.h"
-#include "graphics.h"
+//#include "graphics.h"
 
 static inline void textColor(int32_t attr, int32_t fg, int32_t bg)
 {
@@ -125,7 +125,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 		case 5:
 			printf("Changing to Channel 4!\n");
 			startChannel(3);
-			printf("usao u crtanje\n");
+			//printf("usao u crtanje\n");
 			//drawKeycode(3);
 			break;
 		case 6:
@@ -146,15 +146,18 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 			break;
 		case VOLUME_UP:
 			printf("Volume up!\n");
-			volumeUp();
+			volumeUp();	
+			onVolumePressed();
 			break;
 		case VOLUME_DOWN:
 			printf("Volume down!\n");
 			volumeDown();
+			onVolumePressed();
 			break;
 		case MUTE:
 			printf("Muted!\n");
-			mute();
+			muteVolume();
+			onVolumePressed();
 			break;
 		default:
 			printf("\nPress P+, P-, info or exit! \n\n");
