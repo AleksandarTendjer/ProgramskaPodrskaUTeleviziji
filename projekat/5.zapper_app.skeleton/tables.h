@@ -100,6 +100,7 @@ typedef struct _SdtDescriptor{
 
 typedef struct _SdtTableHeader
 {
+	 uint8_t tableId;  /*table id */	
 	 uint8_t     sectionSyntaxIndicator;             /* The format of the table section to follow */
     uint16_t    sectionLength;                      /* The length of the table section beyond this field */
     uint16_t    transportStreamId;                  /* Transport stream identifier */
@@ -112,9 +113,11 @@ typedef struct _SdtTableHeader
 
 typedef struct _SdtElementaryInfo{
 	uint8_t serviceId;
-	uint8_t eitData;/* first 6 bits are  reserved, the last two are EIT_Schedule_flag and EIT_present_following_flag*/
+	uint8_t eitSchedule;/* last bit,EIT_Schedule_flag */
+	uint8_t eitPresentFollowing;/* last bit EIT_present_following_flag*/
 	uint8_t runningStatus;/* 3 bits */
-	uint8_t freeCaMode; /*1 bit-scrabled or unscramled*/				/*descriptors_loop_length*/
+	uint8_t freeCaMode; /*1 bit-scrabled or unscramled*/				
+	/*descriptors_loop_length*/
 	uint16_t descriptorLoopLength;/*12 bits*/
 	SdtServiceDescriptor descriptor;
 }SdtElementaryInfo;

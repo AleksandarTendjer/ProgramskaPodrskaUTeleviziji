@@ -300,3 +300,94 @@ ParseErrorCode printPmtTable(PmtTable* pmtTable)
     
     return TABLES_PARSE_OK;
 }
+
+
+
+
+ParseErrorCode parseSdtHeader(const uint8_t* sdtHeaderBuffer, SdtTableHeader* sdtHeader)
+{    
+    if(sdtHeaderBuffer==NULL || sdtHeader==NULL)
+    {
+        printf("\n%s : ERROR received parameters are not ok\n", __FUNCTION__);
+        return TABLES_PARSE_ERROR;
+    }
+
+    sdtHeader->tableId = (uint8_t)* sdtHeaderBuffer; 
+    if (sdtHeader->tableId != 0x42 || sdtHeader->tableId != 0x46)
+    {
+        printf("\n%s : ERROR it is not a SDT Table\n", __FUNCTION__);
+        return TABLES_PARSE_ERROR;
+    }
+    
+    uint8_t lower8Bits = 0;
+    uint8_t higher8Bits = 0;
+    uint16_t all16Bits = 0;
+    
+    lower8Bits = (uint8_t)(*(sdtHeaderBuffer + 1));
+    lower8Bits = lower8Bits >> 7;
+    sdtHeader->sectionSyntaxIndicator = lower8Bits & 0x01;
+
+    higher8Bits = (uint8_t) (*(sdtHeaderBuffer + 1));
+    lower8Bits = (uint8_t) (*(sdtHeaderBuffer + 2));
+    all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+    sdtHeader->sectionLength = all16Bits & 0x0FFF;
+    
+    higher8Bits = (uint8_t) (*(sdtHeaderBuffer + 3));
+    lower8Bits = (uint8_t) (*(sdtHeaderBuffer + 4));
+    all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+    sdtHeader->transportStreamId = all16Bits & 0xFFFF;
+    
+    lower8Bits = (uint8_t) (*(sdtHeaderBuffer + 5));
+    lower8Bits = lower8Bits >> 1;
+    sdtHeader->versionNumber = lower8Bits & 0x1F;
+
+    lower8Bits = (uint8_t) (*(sdtHeaderBuffer + 5));
+    sdtHeader->currentNextIndicator = lower8Bits & 0x01;
+
+    lower8Bits = (uint8_t) (*(sdtHeaderBuffer + 6));
+    sdtHeader->sectionNumber = lower8Bits & 0xFF;
+
+    lower8Bits = (uint8_t) (*(sdtHeaderBuffer + 7));
+    sdtHeader->lastSectionNumber = lower8Bits & 0xFF;
+
+	//network_id
+	higher8Bits = (uint8_t) (*(sdtHeaderBuffer + 8));
+	lower8Bits = (uint8_t) (*(sdtHeaderBuffer + 9));
+	all16Bits=(uint16_t) ((higher8Bits << 8) + lower8Bits);
+	 sdtHeader->originalNetworkId = all16Bits;
+	
+
+    return TABLES_PARSE_OK;
+}
+ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtElementaryInfo* sdtServiceInfo)
+{
+	
+    if(sdtServiceInfoBuffer==NULL || sdtServiceInfo==NULL)
+    {
+        printf("\n%s : ERROR received parameters are not ok\n", __FUNCTION__);
+        return TABLES_PARSE_ERROR;
+    }
+	uint8_t lower8Bits = 0;
+    uint8_t higher8Bits = 0;
+    uint16_t all16Bits = 0;
+	/*service id*/
+	higher8Bits = (uint8_t) (*(sdtServiceInfoBuffer));
+    lower8Bits = (uint8_t) (*(sdtServiceInfoBuffer + 1));
+    all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+    sdtServiceInfo->serviceId = all16Bits;
+	/*EIt data*/
+	higher8Bits = (uint8_t) (*(sdtServiceInfoBuffer + 2));
+	sdtServiceInfo->eitSchedule=higher8Bits & 0x01;// last bit
+	sdtServiceInfo->eitPresentFollowing=higher8Bits & 0x02;// next to last bit
+
+	/*running status,free CA mode,descriptors loop length*/
+	higher8Bits = (uint8_t) (*(sdtServiceInfoBuffer + 3));
+    lower8Bits = (uint8_t) (*(sdtServiceInfoBuffer + 4));
+	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+
+	sdtServiceInfo->runningStatus=higher8Bits & 0xE0; // first 3  bits 1110 0000
+	sdtServiceInfo->freeCaMode=higher8Bits & 0x10; // fourth bit 0001 0000
+
+	sdtServiceInfo->descriptorLoopLength=all16Bits & 0x0fff; //12 bits- 0000 1111 1111 1111 
+}
+
