@@ -361,7 +361,7 @@ ParseErrorCode parseSdtHeader(const uint8_t* sdtHeaderBuffer, SdtTableHeader* sd
 }
 ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtElementaryInfo* sdtServiceInfo)
 {
-	
+	int k;
     if(sdtServiceInfoBuffer==NULL || sdtServiceInfo==NULL)
     {
         printf("\n%s : ERROR received parameters are not ok\n", __FUNCTION__);
@@ -389,5 +389,9 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 	sdtServiceInfo->freeCaMode=higher8Bits & 0x10; // fourth bit 0001 0000
 
 	sdtServiceInfo->descriptorLoopLength=all16Bits & 0x0fff; //12 bits- 0000 1111 1111 1111 
+	k=0;
+	//parsing descriptor
+	
+	return TABLES_PARSE_OK;
 }
 
