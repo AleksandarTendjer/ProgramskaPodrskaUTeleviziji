@@ -1,6 +1,6 @@
 #include "stream_controller.h"
 #include "graphics.h"
-//#include "flag.h"
+
 static PatTable *patTable;
 static PmtTable *pmtTable;
 static pthread_cond_t statusCondition = PTHREAD_COND_INITIALIZER;
@@ -436,26 +436,22 @@ void startChannel(int32_t channelNumber)
 			
 			}
 	}
-	printf("ovde sam 3");
+
     
 	//creating a thread for graphics function
      memset(&timerSpec,0,sizeof(timerSpec));
     timerSpec.it_value.tv_sec = 3;
 
-	printf("ovde sam 4");
     if (pthread_create(&scThread, NULL, &graphics,NULL))
     {
         printf("Error creating input event task!\n");
     }
-		//graphics();
-    printf("ovde sam 5");
     /* set the new timer specs */
     ret = timer_settime(timerId,0,&timerSpec,&timerSpecOld);
     if(ret == -1)
     {
         printf("Error setting timer in %s!\n", __FUNCTION__);
     }
-	 printf("    ovde sam 8aaaa        ");
     /* store current channel info */
     currentChannel.programNumber = channelNumber + 1;
     currentChannel.audioPid = audioPid;
@@ -623,6 +619,13 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 		    pthread_mutex_unlock(&demuxMutex);
         }
     }
+	else if (tableId=0x42)
+	{
+		
+	}else if(tableId=0x46)
+	{
+		printf("SDT data is sent with an other stream!\n");
+	}
     return 0;
 }
 
