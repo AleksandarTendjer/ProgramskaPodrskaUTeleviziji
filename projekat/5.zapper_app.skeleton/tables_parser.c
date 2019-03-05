@@ -387,6 +387,7 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 	higher8Bits = (uint8_t) (*(sdtServiceInfoBuffer + 3));
     lower8Bits = (uint8_t) (*(sdtServiceInfoBuffer + 4));
 	all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
+
 	printf("higher 8 bits:%d",higher8Bits);
 	sdtServiceInfo->runningStatus=higher8Bits & 0xE0; // first 3  bits 1110 0000
 	sdtServiceInfo->runningStatus=sdtServiceInfo->runningStatus>>5;
@@ -400,7 +401,7 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 	if(sdtServiceInfo->runningStatus==0x04)//if  the service is running
 		{
 			printf("DescriptorLoopLength:%d\n",sdtServiceInfo->descriptorLoopLength);
-			for(k=0;k<sdtServiceInfo->descriptorLoopLength;k++)
+			for(k=0;k<sdtServiceInfo->descriptorLoopLength;)
 			{
 
 							
@@ -432,6 +433,7 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 					sdtServiceInfo->descriptor.serviceName[i]='\0';
 					printf("\nServiceName: %s \n",sdtServiceInfo->descriptor.serviceName);
 				}
+				k+=sdtServiceInfo->descriptor.descriptorLength;
 				
 			}
 		}
