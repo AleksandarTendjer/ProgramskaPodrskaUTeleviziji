@@ -3,6 +3,7 @@
 
 static PatTable *patTable;
 static PmtTable *pmtTable;
+static SdtTable* sdtTable;
 static pthread_cond_t statusCondition = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t statusMutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -123,7 +124,7 @@ StreamControllerError streamControllerDeinit()
     /* free allocated memory */  
     free(patTable);
     free(pmtTable);
-    
+    free(sdtTable);
     /* set isInitialized flag */
     isInitialized = false;
 
@@ -316,7 +317,8 @@ void startChannel(int32_t channelNumber)
         streamControllerDeinit();
 	}
 	pthread_mutex_unlock(&demuxMutex);
-    	
+	
+
     /* get audio and video pids */
     int16_t audioPid = -1;
     int16_t videoPid = -1;
@@ -456,7 +458,29 @@ void startChannel(int32_t channelNumber)
     currentChannel.programNumber = channelNumber + 1;
     currentChannel.audioPid = audioPid;
     currentChannel.videoPid = videoPid;
-	 printf("ovde sam 8");
+
+/***********************************************************************************************/
+	/* free PMT table filter */
+    Demux_Free_Filter(playerHandle, filterHandle);
+    
+    	 /* set demux filter for receive SDT table of program */
+    if(Demux_Set_Filter(playerHandle, 0x11, 0x42, &filterHandle))
+	{
+		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
+        return;
+	}
+    
+    /* wait for a SDT table to be parsed*/
+    pthread_mutex_lock(&demuxMutex);
+	if (ETIMEDOUT == pthread_cond_wait(&demuxCond, &demuxMutex))
+	{
+		printf("\n%s : ERROR Lock timeout exceeded!\n", __FUNCTION__);
+        streamControllerDeinit();
+	}
+	pthread_mutex_unlock(&demuxMutex);
+/**********************************************************************************************/
+
+	 printf("ovde sam \n");
 		
 }
 
@@ -482,6 +506,15 @@ void* streamControllerTask(input_struct* inputStruct)
         return (void*) SC_ERROR;
 	}  
     memset(pmtTable, 0x0, sizeof(PmtTable));
+
+	    /* allocate memory for SDT table section */
+    sdtTable=(SdtTable*)malloc(sizeof(SdtTable));
+    if(sdtTable==NULL)
+    {
+		printf("\n%s : ERROR Cannot allocate memory\n", __FUNCTION__);
+        return (void*) SC_ERROR;
+	}  
+    memset(sdtTable, 0x0, sizeof(SdtTable));
        
     /* initialize tuner device */
     if(Tuner_Init())
@@ -489,6 +522,7 @@ void* streamControllerTask(input_struct* inputStruct)
         printf("\n%s : ERROR Tuner_Init() fail\n", __FUNCTION__);
         free(patTable);
         free(pmtTable);
+	free(sdtTable);
         return (void*) SC_ERROR;
     }
     
@@ -509,6 +543,7 @@ void* streamControllerTask(input_struct* inputStruct)
         printf("\n%s: ERROR Tuner_Lock_To_Frequency(): %d Hz - fail!\n",__FUNCTION__,inputStruct->freq);
         free(patTable);
         free(pmtTable);
+	free(sdtTable);
         Tuner_Deinit();
         return (void*) SC_ERROR;
     }
@@ -520,6 +555,7 @@ void* streamControllerTask(input_struct* inputStruct)
         printf("\n%s : ERROR Lock timeout exceeded!\n",__FUNCTION__);
         free(patTable);
         free(pmtTable);
+	free(sdtTable);
         Tuner_Deinit();
         return (void*) SC_ERROR;
     }
@@ -531,6 +567,7 @@ void* streamControllerTask(input_struct* inputStruct)
 		printf("\n%s : ERROR Player_Init() fail\n", __FUNCTION__);
 		free(patTable);
         free(pmtTable);
+		free(sdtTable);
         Tuner_Deinit();
         return (void*) SC_ERROR;
 	}
@@ -540,7 +577,8 @@ void* streamControllerTask(input_struct* inputStruct)
     {
 		printf("\n%s : ERROR Player_Source_Open() fail\n", __FUNCTION__);
 		free(patTable);
-        free(pmtTable);
+    	free(pmtTable);
+		free(sdtTable);
 		Player_Deinit(playerHandle);
         Tuner_Deinit();
         return (void*) SC_ERROR;	
@@ -564,6 +602,7 @@ void* streamControllerTask(input_struct* inputStruct)
 		printf("\n%s:ERROR Lock timeout exceeded!\n", __FUNCTION__);
         free(patTable);
         free(pmtTable);
+		free(sdtTable);
 		Player_Deinit(playerHandle);
         Tuner_Deinit();
         return (void*) SC_ERROR;
@@ -593,7 +632,9 @@ void* streamControllerTask(input_struct* inputStruct)
 
 int32_t sectionReceivedCallback(uint8_t *buffer)
 {
-    uint8_t tableId = *buffer;  
+	
+    uint8_t tableId = *buffer; 
+	printf("table ID: %d \n",tableId); 
     if(tableId==0x00)
     {
         //printf("\n%s -----PAT TABLE ARRIVED-----\n",__FUNCTION__);
@@ -619,12 +660,19 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 		    pthread_mutex_unlock(&demuxMutex);
         }
     }
-	else if (tableId=0x42)
+	else if (tableId==0x42)
 	{
+		printf("\n%s -----SDT TABLE ARRIVED-----\n",__FUNCTION__);
+        
+        if(parseSdtTable(buffer,sdtTable)==TABLES_PARSE_OK)
+        {
+            //printPatTable(patTable);
+            pthread_mutex_lock(&demuxMutex);
+		    pthread_cond_signal(&demuxCond);
+		    pthread_mutex_unlock(&demuxMutex);
+            
+        }
 		
-	}else if(tableId=0x46)
-	{
-		printf("SDT data is sent with an other stream!\n");
 	}
     return 0;
 }

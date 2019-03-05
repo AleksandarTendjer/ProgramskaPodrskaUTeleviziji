@@ -214,6 +214,7 @@ ParseErrorCode parseSdtHeader(const uint8_t* sdtHeaderBuffer, SdtTableHeader* sd
  * @param  [out]  descriptor SDT Service info
  * @return tables error code
  */
+
 ParseErrorCode parseSdtServiceInfo(const uint8_t* SdtServiceInfoBuffer, SdtElementaryInfo* sdtServiceInfo);
 
 /**
