@@ -133,6 +133,12 @@ StreamControllerError streamControllerDeinit()
 
     return SC_NO_ERROR;
 }
+StreamControllerError switchChannel(uint8_t number)
+{
+	programNumber=number-1;	
+	changeChannel=true;
+	return SC_NO_ERROR;
+}
 /***************************VOLUME FUNCTIONS*************************************/
 //volume up
 StreamControllerError volumeUp()
@@ -143,8 +149,7 @@ StreamControllerError volumeUp()
 		changeVolume=true;
 		graphicVolume(volume);
 	}
-	//if(Player_Volume_Set(playerHandle,volume)!=0)
-		//return SC_ERROR;
+
 	
 	return SC_NO_ERROR;
 		
@@ -181,8 +186,6 @@ StreamControllerError muteVolume()
 		graphicVolume(volume);
 	}
 	changeVolume=true;
-	//if(Player_Volume_Set(playerHandle,volume)!=0)
-		//return SC_ERROR;
 	
 	return SC_NO_ERROR;
 		
@@ -218,7 +221,6 @@ StreamControllerError channelUp()
     else
     {
         programNumber++;
-	printf("ovde %d \n",programNumber);
     }
 
     /* set flag to start current channel */
@@ -388,10 +390,8 @@ void startChannel(int32_t channelNumber)
 		if(pmtTable->pmtElementaryInfoArray[i].streamType == 0x06)
         {
         	teletextExists = true;
-        	//printf("TELETEKST POSTOJI !!!!!!!!!!!!!!!!!\n");
         }
 	}
-	printf("ovde sam\n");
   	
 	 if (audioPid != -1 && videoPid != -1){
     	flagCH=true;

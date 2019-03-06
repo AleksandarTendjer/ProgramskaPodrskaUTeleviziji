@@ -111,39 +111,41 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 		//channel number pressed
 		case 2:
 			printf("Changing to Channel 1!\n");
-			startChannel(0);
+			//startChannel(0);
+			switchChannel(1);
 			break;
 		case 3:
 			printf("Changing to Channel 2!\n");
-			startChannel(1);
+			//startChannel(1);
+			switchChannel(2);
 			break;
 		case 4:
 			printf("Changing to Channel 3!\n");
-			startChannel(2);
+			//changeChannel(4);			
+			//startChannel(2);
+			switchChannel(3);
 			printf("usao u crtanje\n");
 			//drawKeycode(2);
 			break;
 		case 5:
 			printf("Changing to Channel 4!\n");
-			startChannel(3);
-			//printf("usao u crtanje\n");
-			//drawKeycode(3);
+			//startChannel(3);
+			switchChannel(4);			
 			break;
 		case 6:
 			printf("Changing to Channel 5!\n");
-			startChannel(4);
-			printf("usao u crtanje\n");
-			//drawKeycode(4);
+			//startChannel(4);
+			switchChannel(5);
 			break;
 		case 7:
 			printf("Changing to Channel 6!\n");
-			startChannel(5);
-			//drawKeycode(5);
+			//startChannel(5);
+			switchChannel(6);
 			break;
 		case 8:
 			printf("Changing to Channel 7!\n");
-			startChannel(6);
-			//drawKeycode(6);
+			//startChannel(6);
+			switchChannel(7);
 			break;
 		case VOLUME_UP:
 			printf("Volume up!\n");
