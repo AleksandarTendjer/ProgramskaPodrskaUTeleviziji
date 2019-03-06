@@ -356,7 +356,7 @@ ParseErrorCode parseSdtHeader(const uint8_t* sdtHeaderBuffer, SdtTableHeader* sd
 	lower8Bits = (uint8_t) (*(sdtHeaderBuffer + 9));
 	all16Bits=(uint16_t) ((higher8Bits << 8) + lower8Bits);
 	 sdtHeader->originalNetworkId = all16Bits;
-	printf("\nstigao na kraj hedera\n");
+
 
     return TABLES_PARSE_OK;
 }
@@ -381,7 +381,7 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 	/*EIt data*/
 	higher8Bits = (uint8_t) (*(sdtServiceInfoBuffer + 2));
 	sdtServiceInfo->eitSchedule=higher8Bits & 0x01;// last bit
-	sdtServiceInfo->eitPresentFollowing=higher8Bits & 0x02;// next to last bit
+	sdtServiceInfo->eitPresentFollowing=higher8Bits & 0x02;// next to last bit 0000 0010
 
 	/*running status,free CA mode,descriptors loop length*/
 	higher8Bits = (uint8_t) (*(sdtServiceInfoBuffer + 3));
@@ -400,6 +400,9 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 	printf("running statsu:%d\n",sdtServiceInfo->runningStatus);
 	if(sdtServiceInfo->runningStatus==0x04)//if  the service is running
 		{
+			//memset(sdtServiceInfo->descriptor.serviceName,0,sdtServiceInfo->descriptor.serviceNameLegth);
+			//memset(sdtServiceInfo->descriptor.providerName,0,sdtServiceInfo->descriptor.serviceProviderNameLength);
+			
 			printf("DescriptorLoopLength:%d\n",sdtServiceInfo->descriptorLoopLength);
 			for(k=0;k<sdtServiceInfo->descriptorLoopLength;)
 			{
@@ -414,8 +417,9 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 				}
 				else
 				{
-					printf("usao u else\n");
+					/*this is needed*/
 					sdtServiceInfo->descriptor.serviceType=(uint8_t)(*(sdtServiceInfoBuffer+7+k));
+					
 					sdtServiceInfo->descriptor.serviceProviderNameLength=(uint8_t)(*(sdtServiceInfoBuffer+8+k));
 									
 					for(i=0;i<sdtServiceInfo->descriptor.serviceProviderNameLength;i++)
@@ -423,15 +427,19 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 						//one char is one byte
 						sdtServiceInfo->descriptor.providerName[i]=(char)(*(sdtServiceInfoBuffer+9+k+i));
 					}	
-					sdtServiceInfo->descriptor.providerName[i]='\0';
+					sdtServiceInfo->descriptor.providerName[sdtServiceInfo->descriptor.serviceProviderNameLength]='\0';
 					printf("\nProviderName: %s \n",sdtServiceInfo->descriptor.providerName);
+					
 					sdtServiceInfo->descriptor.serviceNameLegth=(uint8_t)(*(sdtServiceInfoBuffer+9+k+sdtServiceInfo->descriptor.serviceProviderNameLength));
+
 					for(i=0;i<sdtServiceInfo->descriptor.serviceNameLegth;i++)
 					{
-						sdtServiceInfo->descriptor.serviceName[i]=(char)(*(sdtServiceInfoBuffer+9+k+sdtServiceInfo->descriptor.serviceProviderNameLength+i));
+						sdtServiceInfo->descriptor.serviceName[i]=(char)(*(sdtServiceInfoBuffer+9+k+sdtServiceInfo->descriptor.serviceProviderNameLength+i+1));
 					}
-					sdtServiceInfo->descriptor.serviceName[i]='\0';
+					/*serviceName needed*/
+					sdtServiceInfo->descriptor.serviceName[sdtServiceInfo->descriptor.serviceNameLegth]='\0';
 					printf("\nServiceName: %s \n",sdtServiceInfo->descriptor.serviceName);
+						
 				}
 				k+=sdtServiceInfo->descriptor.descriptorLength;
 				

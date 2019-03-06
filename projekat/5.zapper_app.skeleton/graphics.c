@@ -107,7 +107,6 @@ void* graphics()
 {	
 
 	if(flagCH==false){
-		printf("prosao flag\n");
 		
 		/*Set screen black*/ 
 		DFBCHECK(primary->SetColor(primary,0x0f,0x0f,0x0f,0xff));
@@ -133,13 +132,17 @@ void* graphics()
 		
 		if(teletextExists == false)
 		{
-			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: NO", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid);
-			DFBCHECK(primary->DrawString(primary,name , -1, 120, 7*screenHeight/8, DSTF_LEFT));		
+			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: NO serviceType: %d ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid,serviceType);
+			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8, DSTF_LEFT));
+			sprintf(name,"serviceName: %s",serviceName[currentChannel.programNumber-1]);
+			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8+50, DSTF_LEFT));		
 		}
 		else
 		{
-			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: YES", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid);
-			DFBCHECK(primary->DrawString(primary,name , -1, 120, 7*screenHeight/8, DSTF_LEFT));	
+			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: YES  serviceType: %d ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid,serviceType);
+			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8, DSTF_LEFT));
+			sprintf(name,"serviceName: %s",serviceName[currentChannel.programNumber-1]);
+			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8+50, DSTF_LEFT));	
 		}
 
 		DFBCHECK(primary->Flip(primary,NULL,0));
@@ -177,13 +180,18 @@ void* graphics()
 		          			                                                 
 		if(teletextExists == false)
 		{
-			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: NO", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid);
-			DFBCHECK(primary->DrawString(primary,name , -1, 120, 7*screenHeight/8, DSTF_LEFT));		
+			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: NO serviceType: %d  ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid,serviceType);
+			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8, DSTF_LEFT));
+			sprintf(name,"serviceName: %s",serviceName[currentChannel.programNumber-1]);
+			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8+50, DSTF_LEFT));		
 		}
 		else
 		{
-			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: YES", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid);
-			DFBCHECK(primary->DrawString(primary,name , -1, 120, 7*screenHeight/8, DSTF_LEFT));	
+			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: YES serviceType: %d  ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid);
+			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8, DSTF_LEFT));
+	
+			sprintf(name,"serviceName: %s",serviceName[currentChannel.programNumber-1]);
+			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8+50, DSTF_LEFT));			
 		}
 
 		flipRegion.x1 = 0;

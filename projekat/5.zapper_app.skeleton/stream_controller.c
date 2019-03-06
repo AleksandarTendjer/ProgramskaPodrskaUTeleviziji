@@ -40,6 +40,9 @@ static IDirectFBSurface *primary = NULL;
 IDirectFB *dfbInterface = NULL;
 DFBSurfaceDescription surfaceDesc;
 
+char serviceName[7][100];
+uint8_t serviceType;
+
 bool flagCH=false;
 //
 static int8_t firstPassVideo=0;
@@ -306,7 +309,7 @@ void startChannel(int32_t channelNumber)
     if(Demux_Set_Filter(playerHandle, patTable->patServiceInfoArray[channelNumber + 1].pid, 0x02, &filterHandle))
 	{
 		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
-        return;
+        	return;
 	}
     
     /* wait for a PMT table to be parsed*/
@@ -385,7 +388,7 @@ void startChannel(int32_t channelNumber)
 		if(pmtTable->pmtElementaryInfoArray[i].streamType == 0x06)
         {
         	teletextExists = true;
-        	printf("TELETEKST POSTOJI !!!!!!!!!!!!!!!!!\n");
+        	//printf("TELETEKST POSTOJI !!!!!!!!!!!!!!!!!\n");
         }
 	}
 	printf("ovde sam\n");
@@ -672,7 +675,16 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 		    pthread_mutex_unlock(&demuxMutex);
             
         }
-		
+	serviceType=sdtTable->sdtElementaryInfoArray[0].descriptor.serviceType;	
+	
+	
+	int j=0;	
+	for(j=0;j<7;j++)
+	{
+		strcpy(serviceName[j],sdtTable->sdtElementaryInfoArray[j].descriptor.serviceName);
+		printf("serfviceName:%s\n",serviceName[j]);
+	}	
+	printf("service Type:%d\n",serviceType);
 	}
     return 0;
 }
