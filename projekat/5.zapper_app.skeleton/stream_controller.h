@@ -51,7 +51,7 @@ extern ChannelInfo currentChannel;
 extern bool flagCH;
 
 extern char serviceName[7][100];
-extern uint8_t serviceType;
+extern uint8_t serviceType[7];
 
 extern struct itimerspec timerSpec;
 extern struct itimerspec timerSpecOld;

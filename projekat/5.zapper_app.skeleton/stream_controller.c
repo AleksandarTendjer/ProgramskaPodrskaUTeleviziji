@@ -41,7 +41,7 @@ IDirectFB *dfbInterface = NULL;
 DFBSurfaceDescription surfaceDesc;
 
 char serviceName[7][100];
-uint8_t serviceType;
+uint8_t serviceType[7];
 
 bool flagCH=false;
 //
@@ -675,7 +675,7 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 		    pthread_mutex_unlock(&demuxMutex);
             
         }
-	serviceType=sdtTable->sdtElementaryInfoArray[0].descriptor.serviceType;	
+		
 	
 	
 	int j=0;	
@@ -683,8 +683,10 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 	{
 		strcpy(serviceName[j],sdtTable->sdtElementaryInfoArray[j].descriptor.serviceName);
 		printf("serfviceName:%s\n",serviceName[j]);
+		serviceType[j]=sdtTable->sdtElementaryInfoArray[j].descriptor.serviceType;
+		printf("service Type:%d\n",serviceType[j]);
 	}	
-	printf("service Type:%d\n",serviceType);
+	
 	}
     return 0;
 }

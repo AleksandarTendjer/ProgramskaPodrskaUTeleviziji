@@ -132,14 +132,14 @@ void* graphics()
 		
 		if(teletextExists == false)
 		{
-			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: NO serviceType: %d ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid,serviceType);
+			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: NO serviceType: %d ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid,serviceType[currentChannel.programNumber-1]);
 			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8, DSTF_LEFT));
 			sprintf(name,"serviceName: %s",serviceName[currentChannel.programNumber-1]);
 			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8+50, DSTF_LEFT));		
 		}
 		else
 		{
-			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: YES  serviceType: %d ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid,serviceType);
+			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: YES  serviceType: %d ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid,serviceType[currentChannel.programNumber-1]);
 			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8, DSTF_LEFT));
 			sprintf(name,"serviceName: %s",serviceName[currentChannel.programNumber-1]);
 			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8+50, DSTF_LEFT));	
@@ -180,14 +180,14 @@ void* graphics()
 		          			                                                 
 		if(teletextExists == false)
 		{
-			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: NO serviceType: %d  ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid,serviceType);
+			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: NO serviceType: %d  ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid,serviceType[currentChannel.programNumber-1]);
 			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8, DSTF_LEFT));
 			sprintf(name,"serviceName: %s",serviceName[currentChannel.programNumber-1]);
 			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8+50, DSTF_LEFT));		
 		}
 		else
 		{
-			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: YES serviceType: %d  ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid);
+			sprintf(name, "PN: %d    videoPID: %d    audioPID: %d    TTX: YES serviceType: %d  ", currentChannel.programNumber, currentChannel.videoPid,  currentChannel.audioPid,serviceType[currentChannel.programNumber-1]);
 			DFBCHECK(primary->DrawString(primary,name , -1, 150, 7*screenHeight/8, DSTF_LEFT));
 	
 			sprintf(name,"serviceName: %s",serviceName[currentChannel.programNumber-1]);
