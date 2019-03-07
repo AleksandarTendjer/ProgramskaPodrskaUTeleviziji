@@ -27,10 +27,9 @@ static void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t valu
 static pthread_cond_t deinitCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t deinitMutex = PTHREAD_MUTEX_INITIALIZER;
 static ChannelInfo channelInfo;
-
+int8_t currChannel=0;
 void readConf(FILE *);
 input_struct* inputData;
-
 int main(int argc, char *argv[])
 {
 	FILE *fptr;
@@ -38,14 +37,13 @@ int main(int argc, char *argv[])
 	int v = strlen(argv[1]); // for allocating memroy
     	char *str = (char *)malloc(v);
 
-	printf("alocirao\n");
     	strcat(str, argv[1]);
 	//openning a config file 
 	 fptr = fopen(str,"r");
 	  inputData = (input_struct*) malloc(sizeof(input_struct));
   		
 		readConf(fptr);
-	
+		currChannel=inputData->programNumber;
     /* initialize remote controller module */
     ERRORCHECK(remoteControllerInit());
     
@@ -96,11 +94,13 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 			break;
 		case KEYCODE_P_PLUS:
 			printf("\nCH+ pressed\n");
-            		channelUp();
+    		channelUp();
+			currChannel++;
 			break;
 		case KEYCODE_P_MINUS:
 		    printf("\nCH- pressed\n");
-            		channelDown();
+    		channelDown();
+			currChannel--;
 			break;
 		case KEYCODE_EXIT:
 			printf("\nExit pressed\n");
@@ -111,41 +111,73 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 		//channel number pressed
 		case 2:
 			printf("Changing to Channel 1!\n");
-			//startChannel(0);
-			switchChannel(1);
+			if(currChannel!=1)
+			{
+				
+				switchChannel(1);
+			}
+			currChannel=1;			
 			break;
 		case 3:
 			printf("Changing to Channel 2!\n");
-			//startChannel(1);
-			switchChannel(2);
+			if(currChannel!=2)
+			{
+				
+				switchChannel(2);
+			}	
+			currChannel=2;
 			break;
 		case 4:
 			printf("Changing to Channel 3!\n");
-			//changeChannel(4);			
-			//startChannel(2);
-			switchChannel(3);
-			printf("usao u crtanje\n");
-			//drawKeycode(2);
+			
+			if(currChannel!=3)
+			{
+				
+				switchChannel(3);
+			}
+			
+			currChannel=3;
 			break;
 		case 5:
 			printf("Changing to Channel 4!\n");
-			//startChannel(3);
-			switchChannel(4);			
+			
+			if(currChannel!=4)
+			{
+				
+				switchChannel(4);
+			}
+			printf("current Channel: %d\n",currChannel);
+			currChannel=4;		
 			break;
 		case 6:
 			printf("Changing to Channel 5!\n");
-			//startChannel(4);
-			switchChannel(5);
+			
+			if(currChannel!=5)
+			{
+				
+				switchChannel(5);
+			}
+			
+			currChannel=5;
 			break;
 		case 7:
 			printf("Changing to Channel 6!\n");
-			//startChannel(5);
-			switchChannel(6);
+			if(currChannel!=6)
+			{
+				
+				switchChannel(6);
+			}
+			
+			currChannel=6;
 			break;
 		case 8:
 			printf("Changing to Channel 7!\n");
-			//startChannel(6);
-			switchChannel(7);
+			if(currChannel!=7)
+			{
+				switchChannel(7);
+			}
+			
+			currChannel=7;
 			break;
 		case VOLUME_UP:
 			printf("Volume up!\n");
@@ -162,7 +194,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 			muteVolume();
 			onVolumePressed();
 			break;
-		default:
+		default: /*No defined key pressed*/
 			printf("\nPress P+, P-, info or exit! \n\n");
 	}
 }

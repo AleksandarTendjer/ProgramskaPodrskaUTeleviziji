@@ -89,6 +89,7 @@ void* inputEventTask()
             
             /* TODO: trigger remote controller callback */
                         callback(eventBuf.code, eventBuf.type, eventBuf.value);
+			memset(&eventBuf,0x00,sizeof(struct input_event));
 		}
     }
 	return (void*)RC_NO_ERROR;

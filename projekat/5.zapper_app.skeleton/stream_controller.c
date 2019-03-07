@@ -162,9 +162,6 @@ StreamControllerError volumeDown()
 		changeVolume=true;
 		graphicVolume(volume);
 	}
-	//if(Player_Volume_Set(playerHandle,volume)!=0)
-	//	return SC_ERROR;
-	
 	return SC_NO_ERROR;
 		
 }

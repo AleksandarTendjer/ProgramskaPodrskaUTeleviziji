@@ -380,8 +380,8 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 	printf("ServiceID: %d\n",sdtServiceInfo->serviceId);
 	/*EIt data*/
 	higher8Bits = (uint8_t) (*(sdtServiceInfoBuffer + 2));
-	sdtServiceInfo->eitSchedule=higher8Bits & 0x01;// last bit
-	sdtServiceInfo->eitPresentFollowing=higher8Bits & 0x02;// next to last bit 0000 0010
+	sdtServiceInfo->eitSchedule=higher8Bits & 0x02;// last bit 0000 0010
+	sdtServiceInfo->eitPresentFollowing=higher8Bits & 0x01;// next to last bit 0000 0001
 
 	/*running status,free CA mode,descriptors loop length*/
 	higher8Bits = (uint8_t) (*(sdtServiceInfoBuffer + 3));
