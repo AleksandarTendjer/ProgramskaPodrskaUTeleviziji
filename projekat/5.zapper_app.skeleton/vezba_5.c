@@ -30,6 +30,7 @@ static ChannelInfo channelInfo;
 int8_t currChannel=0;
 void readConf(FILE *);
 input_struct* inputData;
+
 int main(int argc, char *argv[])
 {
 	FILE *fptr;

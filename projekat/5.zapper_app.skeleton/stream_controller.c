@@ -58,6 +58,8 @@ static void* streamControllerTask(input_struct* );
 
 static t_Module moduleConvertFun(char*);
 static tStreamType streamConvertFun(int8_t);
+/*function for deinitialization of interfaces and timers*/
+static void DeinitFb();
 
 StreamControllerError streamControllerInit(input_struct* inputStruct)
 {
@@ -130,7 +132,7 @@ StreamControllerError streamControllerDeinit()
     free(sdtTable);
     /* set isInitialized flag */
     isInitialized = false;
-
+	DeinitFb();
     return SC_NO_ERROR;
 }
 StreamControllerError switchChannel(uint8_t number)
@@ -821,5 +823,11 @@ void onVolumePressed()
 		}			
 	}	
 }
-
+/*deinitialization function*/
+void DeinitFb()
+{
+	timer_delete(timerId);
+	timer_delete(timerIdVolume);
+	dfbInterface->Release(dfbInterface);
+}
 
