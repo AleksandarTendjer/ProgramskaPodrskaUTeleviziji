@@ -400,13 +400,13 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 	if(sdtServiceInfo->runningStatus==0x04)//if  the service is running
 		{	
 			printf("DescriptorLoopLength:%d\n",sdtServiceInfo->descriptorLoopLength);
+			
 			for(k=0;k<sdtServiceInfo->descriptorLoopLength;)
-			{
-
-							
+			{				
 				sdtServiceInfo->descriptor.descriptorTag=(uint8_t)(*(sdtServiceInfoBuffer+5+k));
 				sdtServiceInfo->descriptor.descriptorLength=(uint8_t)(*(sdtServiceInfoBuffer+6+k));
 				printf("DescriptorLength:%d\n",sdtServiceInfo->descriptor.descriptorLength);
+				
 				if(sdtServiceInfo->descriptor.descriptorTag!=0x48)
 				{
 					printf("Not a service descriptor!\n");

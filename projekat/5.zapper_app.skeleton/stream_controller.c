@@ -526,7 +526,7 @@ void* streamControllerTask(input_struct* inputStruct)
         printf("\n%s : ERROR Tuner_Init() fail\n", __FUNCTION__);
         free(patTable);
         free(pmtTable);
-	free(sdtTable);
+		free(sdtTable);
         return (void*) SC_ERROR;
     }
     
