@@ -28,10 +28,28 @@ if (err != DFB_OK)                                          \
     DirectFBErrorFatal( #x, err );                          \
   }                                                         \
 }
- 
+ /**
+ * @brief prints info banner
+ *
+ * @param [out] 
+ * @return
+ */
 void* graphics(  );
-void wipeScreen(union sigval signalArg);
-void wipeScreenVolume(union sigval signalArga);
+/**
+ * @brief clears the surface
+ *
+ * @param [out] signal timer structure
+ * @return
+ */
 
+void wipeScreen(union sigval signalArg);
+
+void wipeScreenVolume(union sigval signalArga);
+/**
+ * @brief graphics for volume bar presenting
+ *
+ * @param [out] the number of the volume that is going to be set
+ * @return
+ */
 void graphicVolume(int8_t volumeNumber);
-void intializeVariables();
+

@@ -123,13 +123,27 @@ StreamControllerError volumeDown();
  */
 StreamControllerError muteVolume();
 /**
- * @brief callse the tdp api voluem set function
+ * @brief calls the tdp api voluem set function
  *
  * @param [out] 
  * @return
  */
+
 void setVolume();
+/**
+ * @brief sets the channelInfo struct value on to the current channel
+ *
+ * @param [out] 
+ * @return
+ */
 void onInfoPressed();
+/**
+ * @brief callse the graphics function
+ *
+ * @param [out] 
+ * @return
+ */
 void onVolumePressed();
+
 
 #endif /* __STREAM_CONTROLLER_H__ */

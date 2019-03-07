@@ -351,7 +351,7 @@ ParseErrorCode parseSdtHeader(const uint8_t* sdtHeaderBuffer, SdtTableHeader* sd
     lower8Bits = (uint8_t) (*(sdtHeaderBuffer + 7));
     sdtHeader->lastSectionNumber = lower8Bits & 0xFF;
 
-	//network_id
+	/*network_id*/
 	higher8Bits = (uint8_t) (*(sdtHeaderBuffer + 8));
 	lower8Bits = (uint8_t) (*(sdtHeaderBuffer + 9));
 	all16Bits=(uint16_t) ((higher8Bits << 8) + lower8Bits);
@@ -395,14 +395,10 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 	sdtServiceInfo->freeCaMode=sdtServiceInfo->freeCaMode>>4;
 
 	sdtServiceInfo->descriptorLoopLength=all16Bits & 0x0fff; //12 bits- 0000 1111 1111 1111 
-	//parsing descriptor
-	printf("kkkkkkk\n");
+	/*parsing descriptor*/
 	printf("running statsu:%d\n",sdtServiceInfo->runningStatus);
 	if(sdtServiceInfo->runningStatus==0x04)//if  the service is running
-		{
-			//memset(sdtServiceInfo->descriptor.serviceName,0,sdtServiceInfo->descriptor.serviceNameLegth);
-			//memset(sdtServiceInfo->descriptor.providerName,0,sdtServiceInfo->descriptor.serviceProviderNameLength);
-			
+		{	
 			printf("DescriptorLoopLength:%d\n",sdtServiceInfo->descriptorLoopLength);
 			for(k=0;k<sdtServiceInfo->descriptorLoopLength;)
 			{
@@ -417,14 +413,14 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 				}
 				else
 				{
-					/*this is needed*/
+					/*service type*/
 					sdtServiceInfo->descriptor.serviceType=(uint8_t)(*(sdtServiceInfoBuffer+7+k));
-					
+					/*service provider name length*/
 					sdtServiceInfo->descriptor.serviceProviderNameLength=(uint8_t)(*(sdtServiceInfoBuffer+8+k));
 									
 					for(i=0;i<sdtServiceInfo->descriptor.serviceProviderNameLength;i++)
 					{
-						//one char is one byte
+						/*one char is one byte*/
 						sdtServiceInfo->descriptor.providerName[i]=(char)(*(sdtServiceInfoBuffer+9+k+i));
 					}	
 					sdtServiceInfo->descriptor.providerName[sdtServiceInfo->descriptor.serviceProviderNameLength]='\0';
@@ -436,7 +432,7 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 					{
 						sdtServiceInfo->descriptor.serviceName[i]=(char)(*(sdtServiceInfoBuffer+9+k+sdtServiceInfo->descriptor.serviceProviderNameLength+i+1));
 					}
-					/*serviceName needed*/
+					/*serviceName */
 					sdtServiceInfo->descriptor.serviceName[sdtServiceInfo->descriptor.serviceNameLegth]='\0';
 					printf("\nServiceName: %s \n",sdtServiceInfo->descriptor.serviceName);
 						
@@ -451,30 +447,30 @@ ParseErrorCode parseSdtServiceInfo(const uint8_t* sdtServiceInfoBuffer, SdtEleme
 ParseErrorCode parseSdtTable(const uint8_t* sdtSectionBuffer, SdtTable* sdtTable)
 {
 	uint8_t* currentBufferPosition = NULL;
-    uint32_t parsedLength = 0;
-	  if(sdtSectionBuffer==NULL || sdtTable==NULL)
-    {
-        printf("\n%s : ERROR received parameters are not ok\n", __FUNCTION__);
-        return TABLES_PARSE_ERROR;
-    }
-
+	uint32_t parsedLength = 0;
+	if(sdtSectionBuffer==NULL || sdtTable==NULL)
+	{
+		printf("\n%s : ERROR received parameters are not ok\n", __FUNCTION__);
+		return TABLES_PARSE_ERROR;
+	}
+	/*call the header parsing function*/ 
 	if(parseSdtHeader(sdtSectionBuffer,&(sdtTable->sdtHeader))!=TABLES_PARSE_OK)
 	{
-        	printf("\n%s : ERROR parsing SDT header\n", __FUNCTION__);
+		printf("\n%s : ERROR parsing SDT header\n", __FUNCTION__);
 		return TABLES_PARSE_ERROR;
-    	}
+	}
 	parsedLength=11;/*SDT header+CRC-not in section len*/
 	currentBufferPosition = (uint8_t*)(sdtSectionBuffer + 11); /*Position after reserved_future_use*/
 	sdtTable->elementaryInfoCount=0;/* Number of elementary info presented in SDT table */
-	printf("\nstigao pre fora u ParseSDTTable\n");
-	
 	printf("Section length:%d\n",sdtTable->sdtHeader.sectionLength);
+
 	for(;parsedLength<sdtTable->sdtHeader.sectionLength;)
 		if(sdtTable->elementaryInfoCount>TABLES_MAX_NUMBER_OF_SDT_PID-1)
 		{
 			printf("\n%s : ERROR there is not enough space in SDT structure for elementary info\n", __FUNCTION__);
-            return TABLES_PARSE_ERROR;
+	    	return TABLES_PARSE_ERROR;
 		}
+		/*parsing the sdt Service info Array*/ 
 		else if(parseSdtServiceInfo(currentBufferPosition,&(sdtTable->sdtElementaryInfoArray[sdtTable->elementaryInfoCount]))==TABLES_PARSE_OK)
 		{
 			printf("\nstigao na kraj parseSDTInfo\n");
@@ -505,7 +501,6 @@ ParseErrorCode printSdtTable(SdtTable* sdtTable)
     {
         printf("-----------------------------------------\n");
         printf("service_id           |      %d\n",sdtTable->sdtElementaryInfoArray[i].serviceId);
-        //printf("service_name                      |      %s\n",sdtTable->sdtElementaryInfoArray[i].serviceName); 
     }
     printf("\n********************SDT TABLE SECTION********************\n");
     

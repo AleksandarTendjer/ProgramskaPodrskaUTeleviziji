@@ -334,6 +334,7 @@ void startChannel(int32_t channelNumber)
         if (((pmtTable->pmtElementaryInfoArray[i].streamType == 0x1) || (pmtTable->pmtElementaryInfoArray[i].streamType == 0x2) || (pmtTable->pmtElementaryInfoArray[i].streamType == 0x1b))
   && (videoPid == -1))
         {
+			/*check if the stream is started first time,use the config PID*/
 			if(firstPassVideo==1)
 			{
 				if(inputVideoPID==pmtTable->pmtElementaryInfoArray[i].elementaryPid)
@@ -352,7 +353,7 @@ void startChannel(int32_t channelNumber)
 				
 				firstPassVideo=0;
 			}
-				else//not the first pass
+				else/*not the first pass*/
 			{
 				videoPid = pmtTable->pmtElementaryInfoArray[i].elementaryPid;
 				printf("Video Pid: %d\n",videoPid);
@@ -361,6 +362,7 @@ void startChannel(int32_t channelNumber)
         else if (((pmtTable->pmtElementaryInfoArray[i].streamType == 0x3) || (pmtTable->pmtElementaryInfoArray[i].streamType == 0x4))
             && (audioPid == -1))
         {
+			/*check if the stream is started first time,use the config PID*/
 			if(firstPassAudio==1)
 			{
 				if(inputAudioPID== pmtTable->pmtElementaryInfoArray[i].elementaryPid)
@@ -379,7 +381,7 @@ void startChannel(int32_t channelNumber)
 				
 				firstPassAudio=0;
 			}
-				else //not the first pass
+				else /*not the first pass*/
 			{
 				audioPid = pmtTable->pmtElementaryInfoArray[i].elementaryPid;
 				printf("Audio Pid: %d\n",audioPid);
@@ -392,7 +394,7 @@ void startChannel(int32_t channelNumber)
         	teletextExists = true;
         }
 	}
-  	
+  	/*no video PID, its a radio service*/
 	 if (audioPid != -1 && videoPid != -1){
     	flagCH=true;
     	
@@ -408,7 +410,7 @@ void startChannel(int32_t channelNumber)
         }
 
 	    /* create audio stream */
-        if(Player_Stream_Create(playerHandle, sourceHandle, audioPid, audioStreamType/*AUDIO_TYPE_MPEG_AUDIO*/, &streamHandleA))
+        if(Player_Stream_Create(playerHandle, sourceHandle, audioPid, audioStreamType, &streamHandleA))
         {
             printf("\n%s : ERROR Cannot create audio stream\n", __FUNCTION__);
             streamControllerDeinit();
@@ -424,7 +426,7 @@ void startChannel(int32_t channelNumber)
         }
 
         /* create video stream */
-        if(Player_Stream_Create(playerHandle, sourceHandle, videoPid,videoStreamType /*VIDEO_TYPE_MPEG2*/, &streamHandleV))
+        if(Player_Stream_Create(playerHandle, sourceHandle, videoPid,videoStreamType , &streamHandleV))
         {
             printf("\n%s : ERROR Cannot create video stream\n", __FUNCTION__);
             streamControllerDeinit();
@@ -635,7 +637,7 @@ void* streamControllerTask(input_struct* inputStruct)
 
 int32_t sectionReceivedCallback(uint8_t *buffer)
 {
-	
+	int j=0;	
     uint8_t tableId = *buffer; 
 	printf("table ID: %d \n",tableId); 
     if(tableId==0x00)
@@ -663,10 +665,11 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 		    pthread_mutex_unlock(&demuxMutex);
         }
     }
+		/*check if SDT table has arrived*/
 	else if (tableId==0x42)
 	{
 		printf("\n%s -----SDT TABLE ARRIVED-----\n",__FUNCTION__);
-        
+        /*parse SDT table*/
         if(parseSdtTable(buffer,sdtTable)==TABLES_PARSE_OK)
         {
             //printPatTable(patTable);
@@ -676,9 +679,6 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
             
         }
 		
-	
-	
-	int j=0;	
 	for(j=0;j<7;j++)
 	{
 		strcpy(serviceName[j],sdtTable->sdtElementaryInfoArray[j].descriptor.serviceName);
@@ -706,6 +706,7 @@ int32_t tunerStatusCallback(t_LockStatus status)
     }
     return 0;
 }
+
 t_Module moduleConvertFun(char* string)
 {
 	if(strcmp(string,"DVB_T")==0)
@@ -719,6 +720,7 @@ t_Module moduleConvertFun(char* string)
 		printf("error in input  module Standard!\n");
 	}
 }
+
 tStreamType streamConvertFun(int8_t streamType)
 {
 	if(streamType==10)
@@ -754,6 +756,7 @@ tStreamType streamConvertFun(int8_t streamType)
 		printf("error in input stream type!\n");
 	}
 }
+
 void onInfoPressed()
 {
 	printf("onInfoPressed\n");
@@ -790,10 +793,9 @@ void onInfoPressed()
 
 void onVolumePressed()
 {
-	printf("onVolumePressed\n");
 	int32_t ret;
 	timer_gettime(timerIdVolume, &timerSpecVolume);
-	
+	/*check if the timer tame has exceeded */
 	if(timerSpecVolume.it_value.tv_sec < 3 && timerSpecVolume.it_value.tv_sec > 0)
    	{
 		memset(&timerSpecVolume,0,sizeof(timerSpecVolume));
@@ -806,6 +808,7 @@ void onVolumePressed()
 		    printf("Error setting timer in %s!\n", __FUNCTION__);
 		}
 	}
+	/*timer time has exceeded*/
 	else
 	{
 		graphicVolume(volume);	

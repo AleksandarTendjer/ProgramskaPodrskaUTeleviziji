@@ -9,12 +9,12 @@ static int32_t screenHeight = 0;
 IDirectFBSurface *logoSurface = NULL;
 int32_t logoHeight, logoWidth;
 IDirectFBImageProvider *provider;
-//
+
  IDirectFB *dfbInterface;
- //ChannelInfo currentChannel;
+
 
  bool teletextExists;
-//
+
 
 
 static DFBRegion flipRegion;
@@ -30,8 +30,8 @@ void wipeScreen(union sigval signalArg)
 { 
 	printf("WipeScreen banner\n");
 	int32_t ret;
-	//signalArg.ptr
-    if(currentChannel.videoPid!=-1)
+	
+    if(currentChannel.videoPid!=-1) /*not a radio service*/
     {
     	printf("WipeScreen banner (Stream)\n");
 		// clear screen
@@ -46,10 +46,9 @@ void wipeScreen(union sigval signalArg)
 		
 		DFBCHECK(primary->Flip(primary, &flipRegion, 0));
     }
-    else
+    else/*radio service*/
     {
     	printf("WipeScreen banner(RADIO)\n");
-    	//funkcijazatestiranje();
     	DFBCHECK(primary->SetColor(primary, 0x0f, 0x0f, 0x0f, 0xff));
 		DFBCHECK(primary->FillRectangle(primary, 0, 4*screenHeight/5, screenWidth, screenHeight/5));
 		
